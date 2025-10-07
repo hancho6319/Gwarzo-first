@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smooth Scroll Portfolio</title>
+    <title>Gwarzo First - Building Our Community Together</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,11 +18,12 @@
         }
 
         :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #ff6b6b;
+            --primary: #1a5276;
+            --secondary: #2e86c1;
+            --accent: #e74c3c;
             --light: #f8f9fa;
-            --dark: #343a40;
+            --dark: #2c3e50;
+            --green: #27ae60;
             --transition: all 0.3s ease;
         }
 
@@ -30,6 +36,7 @@
             line-height: 1.6;
             color: var(--dark);
             overflow-x: hidden;
+            background-color: #f5f7fa;
         }
 
         /* Navbar Styles */
@@ -47,7 +54,7 @@
         nav.scrolled {
             padding: 0.5rem 0;
             backdrop-filter: blur(10px);
-            background: rgba(102, 126, 234, 0.95);
+            background: rgba(26, 82, 118, 0.95);
         }
 
         .nav-container {
@@ -68,7 +75,8 @@
             align-items: center;
         }
 
-        .logo i {
+        .logo img {
+            height: 40px;
             margin-right: 0.5rem;
         }
 
@@ -78,13 +86,13 @@
         }
 
         nav ul li {
-            margin: 0 1rem;
+            margin: 0 0.5rem;
         }
 
         nav ul li a {
             color: white;
             text-decoration: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             padding: 0.5rem 1rem;
             border-radius: 25px;
@@ -99,6 +107,40 @@
 
         nav ul li a.active {
             background: rgba(255,255,255,0.3);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .login-btn, .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .login-btn:hover, .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+        }
+
+        .user-info img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
         }
 
         .mobile-toggle {
@@ -123,7 +165,7 @@
         }
 
         section h1 {
-            font-size: 4rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
             text-align: center;
             animation: fadeInUp 1s ease;
@@ -138,31 +180,22 @@
 
         /* Home Section */
         #home {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/home-bg.jpg');
+            background-size: cover;
+            background-position: center;
             color: white;
             position: relative;
         }
 
-        #home::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,138.7C672,139,768,181,864,181.3C960,181,1056,139,1152,128C1248,117,1344,139,1392,149.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            background-size: cover;
-            background-position: center;
-        }
-
         #home h1 {
-            font-size: 5rem;
+            font-size: 4.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             position: relative;
         }
 
         #home p {
             position: relative;
+            font-size: 1.5rem;
         }
 
         .scroll-indicator {
@@ -178,7 +211,9 @@
 
         /* About Section */
         #about {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/about-bg.jpg');
+            background-size: cover;
+            background-position: center;
             color: white;
         }
 
@@ -191,88 +226,39 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .skills {
+        .stats {
             display: flex;
+            justify-content: space-around;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
             margin-top: 2rem;
+            gap: 1rem;
         }
 
-        .skill {
-            background: rgba(255,255,255,0.2);
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            backdrop-filter: blur(5px);
-            transition: var(--transition);
-        }
-
-        .skill:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.3);
-        }
-
-        /* Services Section */
-        #services {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        .service-card {
-            background: rgba(255,255,255,0.2);
-            padding: 2.5rem 2rem;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            transition: var(--transition);
+        .stat {
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
+            padding: 1.5rem;
         }
 
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
-
-        .service-card i {
+        .stat-number {
             font-size: 3rem;
-            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+
+        /* News Section */
+        #news {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/news-bg.jpg');
+            background-size: cover;
+            background-position: center;
             color: white;
         }
 
-        .service-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Portfolio Section */
-        #portfolio {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: #333;
-        }
-
-        .portfolio-grid {
+        .news-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
@@ -281,24 +267,24 @@
             width: 100%;
         }
 
-        .portfolio-item {
-            background: white;
+        .news-card {
+            background: rgba(255,255,255,0.1);
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
             transition: var(--transition);
-            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .portfolio-item:hover {
+        .news-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         }
 
-        .portfolio-img {
+        .news-img {
             width: 100%;
             height: 200px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--secondary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -306,34 +292,255 @@
             color: white;
         }
 
-        .portfolio-info {
+        .news-info {
             padding: 1.5rem;
         }
 
-        .portfolio-info h3 {
+        .news-info h3 {
             margin-bottom: 0.5rem;
-            color: var(--primary);
+            color: white;
         }
 
-        .portfolio-tags {
+        .news-date {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Officials Section */
+        #officials {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/officials-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .officials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .official-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .official-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .official-img {
+            width: 100%;
+            height: 250px;
+            background: var(--primary);
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
         }
 
-        .tag {
-            background: var(--light);
-            padding: 0.3rem 0.8rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            color: var(--dark);
+        .official-info {
+            padding: 1.5rem;
+        }
+
+        .official-info h3 {
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .official-role {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Patrons Section */
+        #patrons {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/patrons-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .patrons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .patron-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .patron-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .patron-img {
+            width: 100%;
+            height: 200px;
+            background: var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .patron-info {
+            padding: 1.5rem;
+        }
+
+        .patron-info h3 {
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        /* Members Section */
+        #members {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/members-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .members-container {
+            max-width: 1200px;
+            width: 100%;
+            margin-top: 3rem;
+        }
+
+        .members-search {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .member-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .member-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .member-info h3 {
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .member-role {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Vaults Section */
+        #vaults {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/vaults-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .vaults-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .vault-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .vault-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .vault-img {
+            width: 100%;
+            height: 200px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .vault-info {
+            padding: 1.5rem;
+        }
+
+        .vault-info h3 {
+            margin-bottom: 0.5rem;
+            color: white;
         }
 
         /* Contact Section */
         #contact {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/contact-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
         }
 
         .contact-container {
@@ -362,7 +569,7 @@
 
         .contact-item i {
             font-size: 1.5rem;
-            color: var(--primary);
+            color: var(--accent);
             margin-right: 1rem;
             width: 40px;
         }
@@ -370,9 +577,10 @@
         .contact-form {
             flex: 1;
             min-width: 300px;
-            background: white;
+            background: rgba(255,255,255,0.1);
             padding: 3rem;
             border-radius: 20px;
+            backdrop-filter: blur(10px);
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
 
@@ -384,25 +592,29 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: var(--primary);
+            color: white;
         }
 
         .form-group input,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 0.8rem;
-            border: 2px solid #e0e0e0;
+            border: 2px solid rgba(255,255,255,0.2);
             border-radius: 10px;
             font-size: 1rem;
             transition: var(--transition);
             font-family: inherit;
+            background: rgba(255,255,255,0.1);
+            color: white;
         }
 
         .form-group input:focus,
-        .form-group textarea:focus {
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
         }
 
         .form-group textarea {
@@ -411,7 +623,7 @@
         }
 
         .submit-btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, #c0392b 100%);
             color: white;
             padding: 1rem 3rem;
             border: none;
@@ -426,7 +638,7 @@
 
         .submit-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.4);
         }
 
         .submit-btn:disabled {
@@ -434,6 +646,69 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .google-login-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .google-login-btn:hover {
+            background: #357ae8;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
         }
 
         /* Toast notification */
@@ -459,11 +734,11 @@
         }
 
         .toast.success {
-            background: #28a745;
+            background: var(--green);
         }
 
         .toast.error {
-            background: #dc3545;
+            background: var(--accent);
         }
 
         /* Footer */
@@ -488,7 +763,7 @@
         }
 
         .social-links a:hover {
-            color: var(--primary);
+            color: var(--accent);
             transform: translateY(-5px);
         }
 
@@ -575,7 +850,7 @@
                 top: 70px;
                 left: 0;
                 width: 100%;
-                background: rgba(102, 126, 234, 0.95);
+                background: rgba(26, 82, 118, 0.95);
                 flex-direction: column;
                 align-items: center;
                 padding: 2rem 0;
@@ -628,24 +903,33 @@
     <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-container">
-            <a href="#home" class="logo">Gwarzo First</a>
+            <a href="#home" class="logo">
+                <!-- Replace with your actual logo from /icons/logo.png -->
+                <i class="fas fa-users"></i> Gwarzo First
+            </a>
             <button class="mobile-toggle" id="mobileToggle">
                 <i class="fas fa-bars"></i>
             </button>
             <ul id="navMenu">
                 <li><a href="#home" class="nav-link">Home</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#services" class="nav-link">Services</a></li>
-                <li><a href="#portfolio" class="nav-link">Gwarzo First</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#news" class="nav-link">News</a></li>
+                <li><a href="#officials" class="nav-link">Officials</a></li>
+                <li><a href="#patrons" class="nav-link">Patrons</a></li>
+                <li><a href="#members" class="nav-link">Members</a></li>
+                <li><a href="#vaults" class="nav-link">Vaults</a></li>
+                <li><a href="#contact" class="nav-link">Contact Us</a></li>
             </ul>
+            <div class="auth-buttons" id="authButtons">
+                <button class="login-btn" id="loginBtn">Login</button>
+            </div>
         </div>
     </nav>
 
     <!-- Home Section -->
     <section id="home">
-        <h1>Welcome to Gwarzo First</h1>
-        <p>Discover amazing work and creativity in one place</p>
+        <h1>Gwarzo First</h1>
+        <p>Building Our Community Together</p>
         <a href="#about" class="scroll-indicator">
             <i class="fas fa-chevron-down"></i>
         </a>
@@ -653,87 +937,245 @@
 
     <!-- About Section -->
     <section id="about">
-        <h1>About</h1>
+        <h1>About Gwarzo First</h1>
         <div class="content">
-            <p>I'm a passionate creative professional dedicated to bringing ideas to life. With years of experience in design and development, I create stunning digital experiences that captivate and inspire. My approach combines technical expertise with artistic vision to deliver exceptional results.</p>
-            <div class="skills">
-                <div class="skill">Web Design</div>
-                <div class="skill">UI/UX</div>
-                <div class="skill">Frontend Development</div>
-                <div class="skill">Mobile Apps</div>
-                <div class="skill">Branding</div>
-                <div class="skill">SEO</div>
+            <p>Gwarzo First is a community-driven initiative focused on development, unity, and progress. We work together to create opportunities, support local businesses, and build a brighter future for all residents of Gwarzo.</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Members</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Years</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Communities</div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section id="services">
-        <h1>Services</h1>
-        <p>Comprehensive solutions tailored to your needs</p>
-        <div class="services-grid">
-            <div class="service-card">
-                <i class="fas fa-palette"></i>
-                <h3>UI/UX Design</h3>
-                <p>Beautiful, user-centered designs that make an impact and drive engagement</p>
+    <!-- News Section -->
+    <section id="news">
+        <h1>Latest News</h1>
+        <p>Stay updated with our community activities and events</p>
+        <div class="news-grid">
+            <div class="news-card">
+                <div class="news-img">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="news-info">
+                    <h3>Community Cleanup Day</h3>
+                    <div class="news-date">March 15, 2024</div>
+                    <p>Join us for our monthly community cleanup event. All volunteers welcome!</p>
+                </div>
             </div>
-            <div class="service-card">
-                <i class="fas fa-code"></i>
-                <h3>Web Development</h3>
-                <p>Clean, efficient code that brings designs to life with modern technologies</p>
+            <div class="news-card">
+                <div class="news-img">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="news-info">
+                    <h3>Youth Scholarship Program</h3>
+                    <div class="news-date">March 10, 2024</div>
+                    <p>Applications now open for our annual youth scholarship program.</p>
+                </div>
             </div>
-            <div class="service-card">
-                <i class="fas fa-mobile-alt"></i>
-                <h3>Mobile Apps</h3>
-                <p>Native and cross-platform mobile solutions with intuitive user experience</p>
-            </div>
-            <div class="service-card">
-                <i class="fas fa-rocket"></i>
-                <h3>Optimization</h3>
-                <p>Performance tuning, SEO optimization and conversion rate improvements</p>
+            <div class="news-card">
+                <div class="news-img">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="news-info">
+                    <h3>Business Grant Announcement</h3>
+                    <div class="news-date">March 5, 2024</div>
+                    <p>New small business grants available for local entrepreneurs.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Portfolio Section -->
-    <section id="portfolio">
-        <h1>Gwarzo First</h1>
-        <p>A showcase of my recent work</p>
-        <div class="portfolio-grid">
-            <div class="portfolio-item">
-                <div class="portfolio-img">🌐</div>
-                <div class="portfolio-info">
-                    <h3>Project Alpha</h3>
-                    <p>A modern web application with stunning visuals and smooth interactions</p>
-                    <div class="portfolio-tags">
-                        <div class="tag">HTML/CSS</div>
-                        <div class="tag">JavaScript</div>
-                        <div class="tag">React</div>
+    <!-- Officials Section -->
+    <section id="officials">
+        <h1>Our Officials</h1>
+        <p>Meet the dedicated team leading Gwarzo First</p>
+        <div class="officials-grid">
+            <div class="official-card">
+                <div class="official-img">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="official-info">
+                    <h3>Alhaji Musa Bello</h3>
+                    <div class="official-role">Chairman</div>
+                    <p>Leading our community initiatives with over 15 years of experience.</p>
+                </div>
+            </div>
+            <div class="official-card">
+                <div class="official-img">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="official-info">
+                    <h3>Hajiya Aisha Yusuf</h3>
+                    <div class="official-role">Secretary</div>
+                    <p>Managing our administrative operations and member communications.</p>
+                </div>
+            </div>
+            <div class="official-card">
+                <div class="official-img">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="official-info">
+                    <h3>Dr. Ibrahim Sani</h3>
+                    <div class="official-role">Treasurer</div>
+                    <p>Overseeing our financial management and community funds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Patrons Section -->
+    <section id="patrons">
+        <h1>Our Patrons</h1>
+        <p>Honoring our esteemed patrons and supporters</p>
+        <div class="patrons-grid">
+            <div class="patron-card">
+                <div class="patron-img">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="patron-info">
+                    <h3>Alhaji Suleiman Gwarzo</h3>
+                    <p>Chief Patron</p>
+                </div>
+            </div>
+            <div class="patron-card">
+                <div class="patron-img">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="patron-info">
+                    <h3>Hajiya Fatima Ahmed</h3>
+                    <p>Community Leader</p>
+                </div>
+            </div>
+            <div class="patron-card">
+                <div class="patron-img">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="patron-info">
+                    <h3>Dr. Kabiru Mohammed</h3>
+                    <p>Education Advocate</p>
+                </div>
+            </div>
+            <div class="patron-card">
+                <div class="patron-img">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="patron-info">
+                    <h3>Alhaji Yusuf Bello</h3>
+                    <p>Business Leader</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Members Section -->
+    <section id="members">
+        <h1>Our Members</h1>
+        <p>Meet our dedicated community members</p>
+        <div class="members-container">
+            <input type="text" class="members-search" placeholder="Search members...">
+            <div class="members-grid">
+                <div class="member-card">
+                    <div class="member-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-info">
+                        <h3>Amina Sani</h3>
+                        <div class="member-role">Active Member</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-info">
+                        <h3>Bashir Abdullahi</h3>
+                        <div class="member-role">Youth Leader</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-info">
+                        <h3>Zainab Ibrahim</h3>
+                        <div class="member-role">Women's Wing</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-info">
+                        <h3>Mohammed Kabir</h3>
+                        <div class="member-role">Business Owner</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-info">
+                        <h3>Halima Yusuf</h3>
+                        <div class="member-role">Teacher</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-img">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="member-info">
+                        <h3>Ibrahim Suleiman</h3>
+                        <div class="member-role">Farmer</div>
                     </div>
                 </div>
             </div>
-            <div class="portfolio-item">
-                <div class="portfolio-img">📱</div>
-                <div class="portfolio-info">
-                    <h3>Mobile App</h3>
-                    <p>Cross-platform mobile solution with intuitive user experience</p>
-                    <div class="portfolio-tags">
-                        <div class="tag">React Native</div>
-                        <div class="tag">Firebase</div>
-                        <div class="tag">UI/UX</div>
-                    </div>
+        </div>
+    </section>
+
+    <!-- Vaults Section -->
+    <section id="vaults">
+        <h1>Community Vaults</h1>
+        <p>Our resources and community funds</p>
+        <div class="vaults-grid">
+            <div class="vault-card">
+                <div class="vault-img">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="vault-info">
+                    <h3>Emergency Fund</h3>
+                    <p>Financial assistance for community members in need.</p>
                 </div>
             </div>
-            <div class="portfolio-item">
-                <div class="portfolio-img">🎨</div>
-                <div class="portfolio-info">
-                    <h3>Brand Identity</h3>
-                    <p>Complete brand redesign with logo, colors, and style guide</p>
-                    <div class="portfolio-tags">
-                        <div class="tag">Branding</div>
-                        <div class="tag">Illustration</div>
-                        <div class="tag">Graphic Design</div>
-                    </div>
+            <div class="vault-card">
+                <div class="vault-img">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="vault-info">
+                    <h3>Education Fund</h3>
+                    <p>Scholarships and educational support for our youth.</p>
+                </div>
+            </div>
+            <div class="vault-card">
+                <div class="vault-img">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="vault-info">
+                    <h3>Business Fund</h3>
+                    <p>Support for local entrepreneurs and small businesses.</p>
                 </div>
             </div>
         </div>
@@ -741,8 +1183,8 @@
 
     <!-- Contact Section -->
     <section id="contact">
-        <h1>Get In Touch</h1>
-        <p>Let's work together on your next project</p>
+        <h1>Contact Us</h1>
+        <p>Get in touch with Gwarzo First</p>
         <div class="contact-container">
             <div class="contact-info">
                 <h2>Contact Information</h2>
@@ -751,21 +1193,21 @@
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
                             <h3>Location</h3>
-                            <p>Kano State, Nigeria</p>
+                            <p>Gwarzo Local Government, Kano State</p>
                         </div>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-envelope"></i>
                         <div>
                             <h3>Email</h3>
-                            <p>gwarzofirst2212@gmail.com</p>
+                            <p>info@gwarzofirst.org</p>
                         </div>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-phone"></i>
                         <div>
                             <h3>Phone</h3>
-                            <p>+234 906 010 0007</p>
+                            <p>+234 801 234 5678</p>
                         </div>
                     </div>
                 </div>
@@ -781,7 +1223,13 @@
                 </div>
                 <div class="form-group">
                     <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" required>
+                    <select id="subject" name="subject" required>
+                        <option value="">Select a subject</option>
+                        <option value="membership">Membership Inquiry</option>
+                        <option value="support">Community Support</option>
+                        <option value="event">Event Information</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="message">Message</label>
@@ -797,13 +1245,25 @@
     <!-- Footer -->
     <footer>
         <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
             <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-linkedin"></i></a>
-            <a href="#"><i class="fab fa-github"></i></a>
-            <a href="#"><i class="fab fa-dribbble"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
         </div>
-        <p>&copy; 2023 Gwarzo First. All rights reserved.</p>
+        <p>&copy; 2024 Gwarzo First. All rights reserved.</p>
     </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <h2>Login to Gwarzo First</h2>
+            <p>Access member-only features and resources</p>
+            <button class="google-login-btn" id="googleLoginBtn">
+                <i class="fab fa-google"></i> Sign in with Google
+            </button>
+        </div>
+    </div>
 
     <!-- Toast notification -->
     <div class="toast" id="toast"></div>
@@ -814,10 +1274,35 @@
     </div>
 
     <script>
-        // Mobile menu toggle
+        // Firebase Configuration - Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Initialize EmailJS with your User ID
+        (function() {
+            emailjs.init("ujsG9I78KZKlpApmiase_");
+        })();
+
+        // DOM Elements
         const mobileToggle = document.getElementById('mobileToggle');
         const navMenu = document.getElementById('navMenu');
+        const loginBtn = document.getElementById('loginBtn');
+        const authButtons = document.getElementById('authButtons');
+        const loginModal = document.getElementById('loginModal');
+        const closeModal = document.getElementById('closeModal');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
 
+        // Mobile menu toggle
         mobileToggle.addEventListener('click', () => {
             navMenu.classList.toggle('active');
             mobileToggle.innerHTML = navMenu.classList.contains('active') 
@@ -888,6 +1373,21 @@
             });
         });
 
+        // Login Modal
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+
         // Toast notification function
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -903,6 +1403,69 @@
                 toast.classList.remove('show');
             }, 5000);
         }
+
+        // Firebase Authentication
+        googleLoginBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // User signed in successfully
+                    showToast('Successfully logged in!', 'success');
+                    loginModal.style.display = 'none';
+                    updateAuthUI(result.user);
+                })
+                .catch((error) => {
+                    console.error('Error during login:', error);
+                    showToast('Login failed. Please try again.', 'error');
+                });
+        });
+
+        // Update UI based on authentication state
+        function updateAuthUI(user) {
+            if (user) {
+                // User is signed in
+                authButtons.innerHTML = `
+                    <div class="user-info">
+                        <img src="${user.photoURL || '/icons/default-user.png'}" alt="User">
+                        <span>${user.displayName || 'User'}</span>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                `;
+                
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    auth.signOut();
+                });
+            } else {
+                // User is signed out
+                authButtons.innerHTML = '<button class="login-btn" id="loginBtn">Login</button>';
+                document.getElementById('loginBtn').addEventListener('click', () => {
+                    loginModal.style.display = 'flex';
+                });
+            }
+        }
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+            updateAuthUI(user);
+        });
+
+        // Member search functionality
+        const memberSearch = document.querySelector('.members-search');
+        const memberCards = document.querySelectorAll('.member-card');
+
+        memberSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            memberCards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
 
         // Form submission with EmailJS integration
         document.getElementById('contactForm').addEventListener('submit', async (e) => {
@@ -931,33 +1494,21 @@
             btnText.innerHTML = '<span class="spinner"></span> Sending...';
             
             try {
-                // Using EmailJS to send the email
-                // You'll need to create an account at https://www.emailjs.com/
-                // and replace these values with your own
-                const serviceID = 'service_rcafyf6'; // Replace with your EmailJS service ID
-                const templateID = 'template_39wrpgg'; // Replace with your EmailJS template ID
-                const userID = 'ujsG9I78KZKlpApmiase_'; // Replace with your EmailJS user ID
+                // Your actual EmailJS IDs
+                const serviceID = 'service_rcafyf6';
+                const templateID = 'template_39wrpgg';
                 
-                // If you don't want to use EmailJS, you can use a simple fetch to a server endpoint
-                // For demonstration, we'll simulate a successful submission
-                
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // In a real implementation, you would use:
+                // Send email using EmailJS
                 await emailjs.send(serviceID, templateID, {
                     to_email: 'gwarzofirst2212@gmail.com',
                     from_name: data.name,
                     from_email: data.email,
                     subject: data.subject,
                     message: data.message
-                }, userID);
-                
-                // For now, we'll just log the data and show success message
-                console.log('Email would be sent to gwarzofirst2212@gmail.com with data:', data);
+                });
                 
                 // Show success message
-                showToast('Message sent successfully! I will get back to you soon.', 'success');
+                showToast('Message sent successfully! We will get back to you soon.', 'success');
                 
                 // Reset form
                 e.target.reset();
@@ -971,14 +1522,6 @@
                 btnText.textContent = 'Send Message';
             }
         });
-
-        // Initialize EmailJS (you would uncomment this when you have your EmailJS account)
-        (function() {
-            emailjs.init("YOUR_USER_ID");
-        })();
     </script>
-    
-    <!-- Uncomment this when you set up EmailJS -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script> -->
 </body>
 </html>
